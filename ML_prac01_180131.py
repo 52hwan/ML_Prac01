@@ -77,10 +77,17 @@ def main(argv):
     for key in train_x.keys():
         my_feature_columns.append(tf.feature_column.numeric_column(key=key))
 
+    my_checkpointing_config = tf.estimator.RunConfig(
+        save_checkpoints_secs=20 * 60,  # Save checkpoints every 20 minutes
+        keep_checkpoint_max=10  # Retain the 10 most recent checkpoints
+    )
+
     # Build 2 hidden layer DNN with 10, 10 units respectively.
     classifier = tf.estimator.DNNClassifier(feature_columns=my_feature_columns,
                                             hidden_units=[10, 10],
-                                            n_classes=3)
+                                            n_classes=3,
+                                            model_dir='models/iris',
+                                            config=my_checkpointing_config)
 
     # Train the model.
     classifier.train(input_fn=lambda:train_input_fn(train_x, train_y, args.batch_size),
